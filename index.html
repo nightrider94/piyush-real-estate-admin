@@ -152,6 +152,15 @@
             font-size: 1.2rem;
         }
         
+        .notification-badge {
+            background: #dc3545;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            margin-left: auto;
+        }
+        
         /* Main Content */
         .main-content {
             margin-left: 260px;
@@ -280,9 +289,28 @@
             color: white;
         }
         
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 0.85rem;
+        }
+        
         /* Table */
         .table-container {
             overflow-x: auto;
+        }
+        
+        .filter-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .filter-bar input,
+        .filter-bar select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
         }
         
         table {
@@ -305,83 +333,6 @@
         
         table tr:hover {
             background: #f8f9fa;
-        }
-        
-        /* Form */
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .form-group-full {
-            grid-column: 1 / -1;
-        }
-        
-        textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            font-size: 1rem;
-            font-family: inherit;
-            min-height: 150px;
-        }
-        
-        select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            font-size: 1rem;
-        }
-        
-        /* Image Upload */
-        .image-upload {
-            border: 2px dashed #ddd;
-            border-radius: 10px;
-            padding: 2rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .image-upload:hover {
-            border-color: #d4af37;
-            background: #fff9e6;
-        }
-        
-        .image-preview {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-        
-        .image-preview-item {
-            position: relative;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        
-        .image-preview-item img {
-            width: 100%;
-            height: 150px;
-            object-fit: cover;
-        }
-        
-        .image-preview-item .remove {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background: #dc3545;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            cursor: pointer;
         }
         
         /* Badge */
@@ -411,6 +362,11 @@
         .badge-info {
             background: #d1ecf1;
             color: #0c5460;
+        }
+        
+        .badge-new {
+            background: #d4af37;
+            color: #1e3a5f;
         }
         
         /* Alert */
@@ -475,6 +431,26 @@
             color: #666;
         }
         
+        .detail-row {
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .detail-row strong {
+            color: #1e3a5f;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-family: inherit;
+            min-height: 100px;
+        }
+        
         /* Responsive */
         @media (max-width: 768px) {
             .sidebar {
@@ -529,6 +505,7 @@
             </div>
             <ul class="sidebar-menu">
                 <li><a href="#" class="menu-link active" data-section="overview"><span class="icon">📊</span> Overview</a></li>
+                <li><a href="#" class="menu-link" data-section="leads"><span class="icon">👥</span> Leads <span class="notification-badge" id="newLeadsCount">12</span></a></li>
                 <li><a href="#" class="menu-link" data-section="properties"><span class="icon">🏘️</span> Properties</a></li>
                 <li><a href="#" class="menu-link" data-section="blogs"><span class="icon">📝</span> Blogs</a></li>
                 <li><a href="#" class="menu-link" data-section="consultations"><span class="icon">📅</span> Consultations</a></li>
@@ -552,14 +529,14 @@
             <div id="overview" class="content-section active">
                 <div class="stats-grid">
                     <div class="stat-card">
+                        <div class="icon">👥</div>
+                        <h3>New Leads Today</h3>
+                        <div class="value" id="todayLeads">12</div>
+                    </div>
+                    <div class="stat-card">
                         <div class="icon">🏘️</div>
                         <h3>Total Properties</h3>
                         <div class="value" id="totalProperties">24</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="icon">✅</div>
-                        <h3>Available</h3>
-                        <div class="value" id="availableProperties">18</div>
                     </div>
                     <div class="stat-card">
                         <div class="icon">📅</div>
@@ -574,29 +551,127 @@
                 </div>
 
                 <div class="card">
-                    <h2>Recent Consultations</h2>
+                    <h2>Recent Leads</h2>
                     <div class="table-container">
                         <table>
                             <thead>
                                 <tr>
                                     <th>Name</th>
                                     <th>Phone</th>
-                                    <th>Date & Time</th>
+                                    <th>Interest</th>
+                                    <th>Source</th>
                                     <th>Status</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
-                            <tbody id="recentConsultations">
+                            <tbody id="recentLeads">
                                 <tr>
                                     <td>Rajesh Kumar</td>
-                                    <td>9876543210</td>
-                                    <td>Dec 5, 2024 - 10:00 AM</td>
-                                    <td><span class="badge badge-success">Paid</span></td>
+                                    <td>+91 98765 43210</td>
+                                    <td>Residential Plot</td>
+                                    <td>Instagram</td>
+                                    <td><span class="badge badge-new">New</span></td>
+                                    <td><button class="btn btn-secondary btn-sm" onclick="viewLead(1)">View</button></td>
                                 </tr>
                                 <tr>
                                     <td>Priya Sharma</td>
-                                    <td>9876543211</td>
-                                    <td>Dec 6, 2024 - 2:00 PM</td>
-                                    <td><span class="badge badge-warning">Pending</span></td>
+                                    <td>+91 98765 43211</td>
+                                    <td>Villa</td>
+                                    <td>Google</td>
+                                    <td><span class="badge badge-info">Contacted</span></td>
+                                    <td><button class="btn btn-secondary btn-sm" onclick="viewLead(2)">View</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leads Section -->
+            <div id="leads" class="content-section">
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                        <h2>Lead Management</h2>
+                        <button class="btn btn-success" onclick="exportLeads()">📥 Export to Excel</button>
+                    </div>
+                    
+                    <div class="filter-bar">
+                        <input type="text" placeholder="Search by name or phone..." id="leadSearch">
+                        <select id="statusFilter">
+                            <option value="">All Status</option>
+                            <option value="new">New</option>
+                            <option value="contacted">Contacted</option>
+                            <option value="qualified">Qualified</option>
+                            <option value="converted">Converted</option>
+                            <option value="lost">Lost</option>
+                        </select>
+                        <select id="interestFilter">
+                            <option value="">All Interests</option>
+                            <option value="Residential Plot">Residential Plot</option>
+                            <option value="Agricultural Land">Agricultural Land</option>
+                            <option value="Commercial Plot">Commercial Plot</option>
+                            <option value="Villa">Villa</option>
+                        </select>
+                        <select id="sourceFilter">
+                            <option value="">All Sources</option>
+                            <option value="Instagram">Instagram</option>
+                            <option value="Facebook">Facebook</option>
+                            <option value="YouTube">YouTube</option>
+                            <option value="Google">Google</option>
+                            <option value="Referral">Referral</option>
+                        </select>
+                        <input type="date" id="dateFilter">
+                    </div>
+                    
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Phone</th>
+                                    <th>Email</th>
+                                    <th>Interest</th>
+                                    <th>Location</th>
+                                    <th>Budget</th>
+                                    <th>Source</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leadsTable">
+                                <tr>
+                                    <td>#001</td>
+                                    <td>Rajesh Kumar</td>
+                                    <td>+91 98765 43210</td>
+                                    <td>rajesh@example.com</td>
+                                    <td>Residential Plot</td>
+                                    <td>Mansarovar</td>
+                                    <td>₹50 Lakhs</td>
+                                    <td>Instagram</td>
+                                    <td>Dec 2, 2024</td>
+                                    <td><span class="badge badge-new">New</span></td>
+                                    <td>
+                                        <button class="btn btn-secondary btn-sm" onclick="viewLead(1)">View</button>
+                                        <button class="btn btn-success btn-sm" onclick="contactLead(1)">Contact</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>#002</td>
+                                    <td>Priya Sharma</td>
+                                    <td>+91 98765 43211</td>
+                                    <td>priya@example.com</td>
+                                    <td>Villa</td>
+                                    <td>Vaishali Nagar</td>
+                                    <td>₹2 Crore</td>
+                                    <td>Google</td>
+                                    <td>Dec 2, 2024</td>
+                                    <td><span class="badge badge-info">Contacted</span></td>
+                                    <td>
+                                        <button class="btn btn-secondary btn-sm" onclick="viewLead(2)">View</button>
+                                        <button class="btn btn-success btn-sm" onclick="contactLead(2)">Contact</button>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -766,6 +841,7 @@
                     <h2>Backup & Export</h2>
                     <p style="margin-bottom: 1rem; color: #666;">Download all your data for backup purposes</p>
                     <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <button class="btn btn-secondary">Export Leads</button>
                         <button class="btn btn-secondary">Export Properties</button>
                         <button class="btn btn-secondary">Export Blogs</button>
                         <button class="btn btn-secondary">Export Consultations</button>
@@ -776,122 +852,82 @@
         </main>
     </div>
 
-    <!-- Property Modal -->
-    <div id="propertyModal" class="modal">
+    <!-- Lead Detail Modal -->
+    <div id="leadModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Add New Property</h2>
-                <button class="modal-close" onclick="closePropertyModal()">&times;</button>
+                <h2>Lead Details</h2>
+                <button class="modal-close" onclick="closeLeadModal()">&times;</button>
             </div>
-            <form id="propertyForm">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Property Title</label>
-                        <input type="text" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Category</label>
-                        <select required>
-                            <option value="">Select Category</option>
-                            <option value="residential">Residential Plot</option>
-                            <option value="agricultural">Agricultural Land</option>
-                            <option value="commercial">Commercial Plot</option>
-                            <option value="villa">Villa</option>
-                        </select>
-                    </div>
+            <div id="leadDetails">
+                <div class="detail-row">
+                    <strong>Name:</strong>
+                    <span>Rajesh Kumar</span>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Location</label>
-                        <input type="text" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Price</label>
-                        <input type="text" placeholder="e.g., 45 Lakhs" required>
-                    </div>
+                <div class="detail-row">
+                    <strong>Phone:</strong>
+                    <span>+91 98765 43210</span>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Plot Size</label>
-                        <input type="text" placeholder="e.g., 1200 sq ft" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Status</label>
-                        <select required>
-                            <option value="available">Available</option>
-                            <option value="sold">Sold</option>
-                        </select>
-                    </div>
+                <div class="detail-row">
+                    <strong>Email:</strong>
+                    <span>rajesh@example.com</span>
                 </div>
-                <div class="form-group form-group-full">
-                    <label>Description</label>
-                    <textarea required></textarea>
+                <div class="detail-row">
+                    <strong>Interest:</strong>
+                    <span>Residential Plot</span>
                 </div>
-                <div class="form-group form-group-full">
-                    <label>Upload Images</label>
-                    <div class="image-upload">
-                        <p>📷 Click to upload images or drag and drop</p>
-                        <input type="file" multiple accept="image/*" style="display: none;">
-                    </div>
-                    <div class="image-preview"></div>
+                <div class="detail-row">
+                    <strong>Location:</strong>
+                    <span>Mansarovar</span>
                 </div>
-                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
-                    <button type="button" class="btn btn-secondary" onclick="closePropertyModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save Property</button>
+                <div class="detail-row">
+                    <strong>Budget:</strong>
+                    <span>₹50 Lakhs</span>
                 </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Blog Modal -->
-    <div id="blogModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Create New Blog Post</h2>
-                <button class="modal-close" onclick="closeBlogModal()">&times;</button>
+                <div class="detail-row">
+                    <strong>Contact Method:</strong>
+                    <span>WhatsApp</span>
+                </div>
+                <div class="detail-row">
+                    <strong>Preferred Time:</strong>
+                    <span>Morning</span>
+                </div>
+                <div class="detail-row">
+                    <strong>Message:</strong>
+                    <span>Looking for a residential plot in Mansarovar area with good connectivity.</span>
+                </div>
+                <div class="detail-row">
+                    <strong>Source:</strong>
+                    <span>Instagram</span>
+                </div>
+                <div class="detail-row">
+                    <strong>UTM Campaign:</strong>
+                    <span>summer_sale_2024</span>
+                </div>
+                <div class="detail-row">
+                    <strong>Created:</strong>
+                    <span>Dec 2, 2024 10:30 AM</span>
+                </div>
+                <div class="detail-row">
+                    <strong>Status:</strong>
+                    <select id="leadStatus">
+                        <option value="new">New</option>
+                        <option value="contacted">Contacted</option>
+                        <option value="qualified">Qualified</option>
+                        <option value="converted">Converted</option>
+                        <option value="lost">Lost</option>
+                    </select>
+                </div>
+                <div class="detail-row">
+                    <strong>Notes:</strong>
+                    <textarea id="leadNotes" placeholder="Add notes about this lead..."></textarea>
+                </div>
             </div>
-            <form id="blogForm">
-                <div class="form-group">
-                    <label>Blog Title</label>
-                    <input type="text" required>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Category</label>
-                        <input type="text" placeholder="e.g., Market Update" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Tags</label>
-                        <input type="text" placeholder="Separate with commas">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Content</label>
-                    <textarea style="min-height: 300px;" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Thumbnail Image</label>
-                    <div class="image-upload">
-                        <p>📷 Click to upload thumbnail</p>
-                        <input type="file" accept="image/*" style="display: none;">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Meta Title (SEO)</label>
-                        <input type="text">
-                    </div>
-                    <div class="form-group">
-                        <label>Meta Description (SEO)</label>
-                        <input type="text">
-                    </div>
-                </div>
-                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
-                    <button type="button" class="btn btn-secondary" onclick="closeBlogModal()">Cancel</button>
-                    <button type="button" class="btn btn-secondary">Save as Draft</button>
-                    <button type="submit" class="btn btn-primary">Publish</button>
-                </div>
-            </form>
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button class="btn btn-success" onclick="contactLeadFromModal()">📞 Contact via WhatsApp</button>
+                <button class="btn btn-primary" onclick="saveLeadChanges()">Save Changes</button>
+                <button class="btn btn-secondary" onclick="closeLeadModal()">Close</button>
+            </div>
         </div>
     </div>
 
@@ -902,7 +938,7 @@
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             
-            // Demo credentials - Replace with actual authentication
+            // Demo credentials
             if (username === 'admin' && password === 'piyush@2024') {
                 document.getElementById('loginPage').style.display = 'none';
                 document.getElementById('dashboardPage').classList.add('active');
@@ -931,18 +967,16 @@
             link.addEventListener('click', function(e) {
                 e.preventDefault();
                 
-                // Update active menu
                 document.querySelectorAll('.menu-link').forEach(l => l.classList.remove('active'));
                 this.classList.add('active');
                 
-                // Show corresponding section
                 const section = this.dataset.section;
                 document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
                 document.getElementById(section).classList.add('active');
                 
-                // Update page title
                 const titles = {
                     'overview': 'Dashboard Overview',
+                    'leads': 'Lead Management',
                     'properties': 'Property Listings',
                     'blogs': 'Blog Management',
                     'consultations': 'Consultation Bookings',
@@ -953,48 +987,46 @@
             });
         });
 
-        // Modal functions
-        function openPropertyModal() {
-            document.getElementById('propertyModal').classList.add('active');
+        // Lead functions
+        function viewLead(id) {
+            document.getElementById('leadModal').classList.add('active');
         }
 
-        function closePropertyModal() {
-            document.getElementById('propertyModal').classList.remove('active');
+        function closeLeadModal() {
+            document.getElementById('leadModal').classList.remove('active');
         }
 
-        function openBlogModal() {
-            document.getElementById('blogModal').classList.add('active');
+        function contactLead(id) {
+            const phone = '917019901055';
+            const message = 'Hi, this is Piyush from Piyush Real Estate. I received your enquiry about properties. When would be a good time to discuss your requirements?';
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
         }
 
-        function closeBlogModal() {
-            document.getElementById('blogModal').classList.remove('active');
+        function contactLeadFromModal() {
+            contactLead(1);
         }
 
-        // Export consultations
+        function saveLeadChanges() {
+            alert('Lead changes saved successfully!');
+            closeLeadModal();
+        }
+
+        function exportLeads() {
+            alert('Exporting leads to Excel...');
+        }
+
         function exportConsultations() {
             alert('Exporting consultations to Excel...');
-            // Implement actual export functionality
         }
 
-        // Form submissions
-        document.getElementById('propertyForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            alert('Property saved successfully!');
-            closePropertyModal();
-        });
-
-        document.getElementById('blogForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            alert('Blog published successfully!');
-            closeBlogModal();
-        });
-
-        // Image upload handling
-        document.querySelectorAll('.image-upload').forEach(upload => {
-            upload.addEventListener('click', function() {
-                this.querySelector('input[type="file"]').click();
-            });
-        });
+        // Simulate new lead notification
+        setInterval(() => {
+            const badge = document.getElementById('newLeadsCount');
+            const currentCount = parseInt(badge.textContent);
+            if (Math.random() > 0.7) {
+                badge.textContent = currentCount + 1;
+            }
+        }, 30000);
     </script>
 </body>
 </html>
