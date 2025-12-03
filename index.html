@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Piyush Real Estate - Admin Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -16,7 +17,6 @@
             background: #f5f5f5;
         }
         
-        /* Login Page */
         .login-container {
             display: flex;
             justify-content: center;
@@ -60,18 +60,24 @@
             font-weight: 600;
         }
         
-        .form-group input {
+        .form-group input, .form-group select, .form-group textarea {
             width: 100%;
             padding: 12px;
             border: 2px solid #ddd;
             border-radius: 5px;
             font-size: 1rem;
             transition: border-color 0.3s;
+            font-family: inherit;
         }
         
-        .form-group input:focus {
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
             outline: none;
             border-color: #d4af37;
+        }
+        
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
         }
         
         .btn-login {
@@ -92,7 +98,6 @@
             transform: translateY(-2px);
         }
         
-        /* Dashboard */
         .dashboard {
             display: none;
         }
@@ -101,7 +106,6 @@
             display: block;
         }
         
-        /* Sidebar */
         .sidebar {
             position: fixed;
             left: 0;
@@ -161,14 +165,12 @@
             margin-left: auto;
         }
         
-        /* Main Content */
         .main-content {
             margin-left: 260px;
             padding: 2rem;
             min-height: 100vh;
         }
         
-        /* Header */
         .header {
             background: white;
             padding: 1.5rem 2rem;
@@ -201,7 +203,6 @@
             font-weight: 600;
         }
         
-        /* Stats Cards */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -233,7 +234,6 @@
             margin-bottom: 1rem;
         }
         
-        /* Content Section */
         .content-section {
             display: none;
         }
@@ -255,7 +255,6 @@
             margin-bottom: 1.5rem;
         }
         
-        /* Buttons */
         .btn {
             padding: 10px 20px;
             border: none;
@@ -294,7 +293,6 @@
             font-size: 0.85rem;
         }
         
-        /* Table */
         .table-container {
             overflow-x: auto;
         }
@@ -335,7 +333,6 @@
             background: #f8f9fa;
         }
         
-        /* Badge */
         .badge {
             display: inline-block;
             padding: 5px 10px;
@@ -369,7 +366,6 @@
             color: #1e3a5f;
         }
         
-        /* Alert */
         .alert {
             padding: 1rem;
             border-radius: 5px;
@@ -388,7 +384,6 @@
             border: 1px solid #f5c6cb;
         }
         
-        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -442,16 +437,6 @@
             color: #1e3a5f;
         }
         
-        textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            font-family: inherit;
-            min-height: 100px;
-        }
-        
-        /* Responsive */
         @media (max-width: 768px) {
             .sidebar {
                 transform: translateX(-100%);
@@ -473,7 +458,6 @@
     </style>
 </head>
 <body>
-    <!-- Login Page -->
     <div id="loginPage" class="login-container">
         <div class="login-box">
             <div class="login-logo">
@@ -495,9 +479,7 @@
         </div>
     </div>
 
-    <!-- Dashboard -->
     <div id="dashboardPage" class="dashboard">
-        <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-logo">
                 <h2>Piyush Real Estate</h2>
@@ -505,18 +487,13 @@
             </div>
             <ul class="sidebar-menu">
                 <li><a href="#" class="menu-link active" data-section="overview"><span class="icon">📊</span> Overview</a></li>
-                <li><a href="#" class="menu-link" data-section="leads"><span class="icon">👥</span> Leads <span class="notification-badge" id="newLeadsCount">12</span></a></li>
+                <li><a href="#" class="menu-link" data-section="leads"><span class="icon">👥</span> Leads <span class="notification-badge" id="newLeadsCount">0</span></a></li>
                 <li><a href="#" class="menu-link" data-section="properties"><span class="icon">🏘️</span> Properties</a></li>
                 <li><a href="#" class="menu-link" data-section="blogs"><span class="icon">📝</span> Blogs</a></li>
-                <li><a href="#" class="menu-link" data-section="consultations"><span class="icon">📅</span> Consultations</a></li>
-                <li><a href="#" class="menu-link" data-section="payments"><span class="icon">💰</span> Payments</a></li>
-                <li><a href="#" class="menu-link" data-section="settings"><span class="icon">⚙️</span> Settings</a></li>
             </ul>
         </aside>
 
-        <!-- Main Content -->
         <main class="main-content">
-            <!-- Header -->
             <div class="header">
                 <h1 id="pageTitle">Dashboard Overview</h1>
                 <div class="user-info">
@@ -525,28 +502,27 @@
                 </div>
             </div>
 
-            <!-- Overview Section -->
             <div id="overview" class="content-section active">
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="icon">👥</div>
-                        <h3>New Leads Today</h3>
-                        <div class="value" id="todayLeads">12</div>
+                        <h3>Total Leads</h3>
+                        <div class="value" id="totalLeads">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="icon">🆕</div>
+                        <h3>New Leads</h3>
+                        <div class="value" id="newLeads">0</div>
                     </div>
                     <div class="stat-card">
                         <div class="icon">🏘️</div>
                         <h3>Total Properties</h3>
-                        <div class="value" id="totalProperties">24</div>
+                        <div class="value" id="totalProperties">0</div>
                     </div>
                     <div class="stat-card">
-                        <div class="icon">📅</div>
-                        <h3>Consultations</h3>
-                        <div class="value" id="totalConsultations">47</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="icon">💰</div>
-                        <h3>Revenue</h3>
-                        <div class="value">₹23,453</div>
+                        <div class="icon">📝</div>
+                        <h3>Published Blogs</h3>
+                        <div class="value" id="totalBlogs">0</div>
                     </div>
                 </div>
 
@@ -565,29 +541,13 @@
                                 </tr>
                             </thead>
                             <tbody id="recentLeads">
-                                <tr>
-                                    <td>Rajesh Kumar</td>
-                                    <td>+91 98765 43210</td>
-                                    <td>Residential Plot</td>
-                                    <td>Instagram</td>
-                                    <td><span class="badge badge-new">New</span></td>
-                                    <td><button class="btn btn-secondary btn-sm" onclick="viewLead(1)">View</button></td>
-                                </tr>
-                                <tr>
-                                    <td>Priya Sharma</td>
-                                    <td>+91 98765 43211</td>
-                                    <td>Villa</td>
-                                    <td>Google</td>
-                                    <td><span class="badge badge-info">Contacted</span></td>
-                                    <td><button class="btn btn-secondary btn-sm" onclick="viewLead(2)">View</button></td>
-                                </tr>
+                                <tr><td colspan="6" style="text-align: center;">Loading...</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- Leads Section -->
             <div id="leads" class="content-section">
                 <div class="card">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
@@ -596,8 +556,8 @@
                     </div>
                     
                     <div class="filter-bar">
-                        <input type="text" placeholder="Search by name or phone..." id="leadSearch">
-                        <select id="statusFilter">
+                        <input type="text" placeholder="Search by name or phone..." id="leadSearch" onkeyup="filterLeads()">
+                        <select id="statusFilter" onchange="filterLeads()">
                             <option value="">All Status</option>
                             <option value="new">New</option>
                             <option value="contacted">Contacted</option>
@@ -605,22 +565,13 @@
                             <option value="converted">Converted</option>
                             <option value="lost">Lost</option>
                         </select>
-                        <select id="interestFilter">
+                        <select id="interestFilter" onchange="filterLeads()">
                             <option value="">All Interests</option>
                             <option value="Residential Plot">Residential Plot</option>
                             <option value="Agricultural Land">Agricultural Land</option>
                             <option value="Commercial Plot">Commercial Plot</option>
                             <option value="Villa">Villa</option>
                         </select>
-                        <select id="sourceFilter">
-                            <option value="">All Sources</option>
-                            <option value="Instagram">Instagram</option>
-                            <option value="Facebook">Facebook</option>
-                            <option value="YouTube">YouTube</option>
-                            <option value="Google">Google</option>
-                            <option value="Referral">Referral</option>
-                        </select>
-                        <input type="date" id="dateFilter">
                     </div>
                     
                     <div class="table-container">
@@ -641,45 +592,13 @@
                                 </tr>
                             </thead>
                             <tbody id="leadsTable">
-                                <tr>
-                                    <td>#001</td>
-                                    <td>Rajesh Kumar</td>
-                                    <td>+91 98765 43210</td>
-                                    <td>rajesh@example.com</td>
-                                    <td>Residential Plot</td>
-                                    <td>Mansarovar</td>
-                                    <td>₹50 Lakhs</td>
-                                    <td>Instagram</td>
-                                    <td>Dec 2, 2024</td>
-                                    <td><span class="badge badge-new">New</span></td>
-                                    <td>
-                                        <button class="btn btn-secondary btn-sm" onclick="viewLead(1)">View</button>
-                                        <button class="btn btn-success btn-sm" onclick="contactLead(1)">Contact</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>#002</td>
-                                    <td>Priya Sharma</td>
-                                    <td>+91 98765 43211</td>
-                                    <td>priya@example.com</td>
-                                    <td>Villa</td>
-                                    <td>Vaishali Nagar</td>
-                                    <td>₹2 Crore</td>
-                                    <td>Google</td>
-                                    <td>Dec 2, 2024</td>
-                                    <td><span class="badge badge-info">Contacted</span></td>
-                                    <td>
-                                        <button class="btn btn-secondary btn-sm" onclick="viewLead(2)">View</button>
-                                        <button class="btn btn-success btn-sm" onclick="contactLead(2)">Contact</button>
-                                    </td>
-                                </tr>
+                                <tr><td colspan="11" style="text-align: center;">Loading...</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- Properties Section -->
             <div id="properties" class="content-section">
                 <div class="card">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
@@ -699,24 +618,13 @@
                                 </tr>
                             </thead>
                             <tbody id="propertiesTable">
-                                <tr>
-                                    <td>Residential Plot - Mansarovar</td>
-                                    <td>Residential Plot</td>
-                                    <td>Mansarovar, Jaipur</td>
-                                    <td>₹45 Lakhs</td>
-                                    <td><span class="badge badge-success">Available</span></td>
-                                    <td>
-                                        <button class="btn btn-secondary btn-sm">Edit</button>
-                                        <button class="btn btn-danger btn-sm">Delete</button>
-                                    </td>
-                                </tr>
+                                <tr><td colspan="6" style="text-align: center;">Loading...</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- Blogs Section -->
             <div id="blogs" class="content-section">
                 <div class="card">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
@@ -735,194 +643,22 @@
                                 </tr>
                             </thead>
                             <tbody id="blogsTable">
-                                <tr>
-                                    <td>Jaipur Real Estate Market Trends 2024</td>
-                                    <td>Market Update</td>
-                                    <td>Dec 1, 2024</td>
-                                    <td><span class="badge badge-success">Published</span></td>
-                                    <td>
-                                        <button class="btn btn-secondary btn-sm">Edit</button>
-                                        <button class="btn btn-danger btn-sm">Delete</button>
-                                    </td>
-                                </tr>
+                                <tr><td colspan="5" style="text-align: center;">Loading...</td></tr>
                             </tbody>
                         </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Consultations Section -->
-            <div id="consultations" class="content-section">
-                <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                        <h2>Consultation Bookings</h2>
-                        <button class="btn btn-success" onclick="exportConsultations()">📥 Export to Excel</button>
-                    </div>
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Phone</th>
-                                    <th>Email</th>
-                                    <th>Date & Time</th>
-                                    <th>Payment Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="consultationsTable">
-                                <tr>
-                                    <td>Rajesh Kumar</td>
-                                    <td>9876543210</td>
-                                    <td>rajesh@example.com</td>
-                                    <td>Dec 5, 2024 - 10:00 AM</td>
-                                    <td><span class="badge badge-success">Paid</span></td>
-                                    <td>
-                                        <button class="btn btn-secondary btn-sm">View Details</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Payments Section -->
-            <div id="payments" class="content-section">
-                <div class="card">
-                    <h2>Payment Tracking</h2>
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Transaction ID</th>
-                                    <th>Client Name</th>
-                                    <th>Amount</th>
-                                    <th>Method</th>
-                                    <th>UPI ID</th>
-                                    <th>Date</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="paymentsTable">
-                                <tr>
-                                    <td>#TXN001</td>
-                                    <td>Rajesh Kumar</td>
-                                    <td>₹499</td>
-                                    <td>Google Pay</td>
-                                    <td>piyush9459.23@okicici</td>
-                                    <td>Dec 2, 2024</td>
-                                    <td><span class="badge badge-success">Paid</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Settings Section -->
-            <div id="settings" class="content-section">
-                <div class="card">
-                    <h2>Settings</h2>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Admin Username</label>
-                            <input type="text" value="admin" disabled>
-                        </div>
-                        <div class="form-group">
-                            <label>Change Password</label>
-                            <input type="password" placeholder="New password">
-                        </div>
-                    </div>
-                    <button class="btn btn-primary">Save Changes</button>
-                </div>
-
-                <div class="card">
-                    <h2>Backup & Export</h2>
-                    <p style="margin-bottom: 1rem; color: #666;">Download all your data for backup purposes</p>
-                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                        <button class="btn btn-secondary">Export Leads</button>
-                        <button class="btn btn-secondary">Export Properties</button>
-                        <button class="btn btn-secondary">Export Blogs</button>
-                        <button class="btn btn-secondary">Export Consultations</button>
-                        <button class="btn btn-secondary">Export Payments</button>
                     </div>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Lead Detail Modal -->
     <div id="leadModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Lead Details</h2>
                 <button class="modal-close" onclick="closeLeadModal()">&times;</button>
             </div>
-            <div id="leadDetails">
-                <div class="detail-row">
-                    <strong>Name:</strong>
-                    <span>Rajesh Kumar</span>
-                </div>
-                <div class="detail-row">
-                    <strong>Phone:</strong>
-                    <span>+91 98765 43210</span>
-                </div>
-                <div class="detail-row">
-                    <strong>Email:</strong>
-                    <span>rajesh@example.com</span>
-                </div>
-                <div class="detail-row">
-                    <strong>Interest:</strong>
-                    <span>Residential Plot</span>
-                </div>
-                <div class="detail-row">
-                    <strong>Location:</strong>
-                    <span>Mansarovar</span>
-                </div>
-                <div class="detail-row">
-                    <strong>Budget:</strong>
-                    <span>₹50 Lakhs</span>
-                </div>
-                <div class="detail-row">
-                    <strong>Contact Method:</strong>
-                    <span>WhatsApp</span>
-                </div>
-                <div class="detail-row">
-                    <strong>Preferred Time:</strong>
-                    <span>Morning</span>
-                </div>
-                <div class="detail-row">
-                    <strong>Message:</strong>
-                    <span>Looking for a residential plot in Mansarovar area with good connectivity.</span>
-                </div>
-                <div class="detail-row">
-                    <strong>Source:</strong>
-                    <span>Instagram</span>
-                </div>
-                <div class="detail-row">
-                    <strong>UTM Campaign:</strong>
-                    <span>summer_sale_2024</span>
-                </div>
-                <div class="detail-row">
-                    <strong>Created:</strong>
-                    <span>Dec 2, 2024 10:30 AM</span>
-                </div>
-                <div class="detail-row">
-                    <strong>Status:</strong>
-                    <select id="leadStatus">
-                        <option value="new">New</option>
-                        <option value="contacted">Contacted</option>
-                        <option value="qualified">Qualified</option>
-                        <option value="converted">Converted</option>
-                        <option value="lost">Lost</option>
-                    </select>
-                </div>
-                <div class="detail-row">
-                    <strong>Notes:</strong>
-                    <textarea id="leadNotes" placeholder="Add notes about this lead..."></textarea>
-                </div>
-            </div>
+            <div id="leadDetails"></div>
             <div style="display: flex; gap: 1rem; margin-top: 2rem;">
                 <button class="btn btn-success" onclick="contactLeadFromModal()">📞 Contact via WhatsApp</button>
                 <button class="btn btn-primary" onclick="saveLeadChanges()">Save Changes</button>
@@ -931,18 +667,112 @@
         </div>
     </div>
 
+    <div id="propertyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="propertyModalTitle">Add New Property</h2>
+                <button class="modal-close" onclick="closePropertyModal()">&times;</button>
+            </div>
+            <form id="propertyForm">
+                <input type="hidden" id="propertyId">
+                <div class="form-group">
+                    <label>Property Title</label>
+                    <input type="text" id="propertyTitle" required>
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="propertyCategory" required>
+                        <option value="">Select Category</option>
+                        <option value="residential">Residential Plot</option>
+                        <option value="agricultural">Agricultural Land</option>
+                        <option value="commercial">Commercial Plot</option>
+                        <option value="villa">Villa</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" id="propertyLocation" required>
+                </div>
+                <div class="form-group">
+                    <label>Price</label>
+                    <input type="text" id="propertyPrice" placeholder="e.g., ₹45 Lakhs" required>
+                </div>
+                <div class="form-group">
+                    <label>Plot Size</label>
+                    <input type="text" id="propertyPlotSize" placeholder="e.g., 1200 sq ft" required>
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="propertyStatus" required>
+                        <option value="available">Available</option>
+                        <option value="sold">Sold</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="propertyDescription" required></textarea>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button type="button" class="btn btn-secondary" onclick="closePropertyModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Property</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="blogModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="blogModalTitle">Create New Blog Post</h2>
+                <button class="modal-close" onclick="closeBlogModal()">&times;</button>
+            </div>
+            <form id="blogForm">
+                <input type="hidden" id="blogId">
+                <div class="form-group">
+                    <label>Blog Title</label>
+                    <input type="text" id="blogTitle" required>
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <input type="text" id="blogCategory" placeholder="e.g., Market Update" required>
+                </div>
+                <div class="form-group">
+                    <label>Content</label>
+                    <textarea id="blogContent" style="min-height: 300px;" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="blogStatus" required>
+                        <option value="draft">Draft</option>
+                        <option value="published">Published</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button type="button" class="btn btn-secondary" onclick="closeBlogModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Blog</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
-        // Login functionality
+        const SUPABASE_URL = 'https://qevkqvqjneyfkhlbyayr.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFldmtxdnFqbmV5ZmtobGJ5YXlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTYxMzcsImV4cCI6MjA4MDI3MjEzN30.dk5YDrbT25RcTc9bHWKwvY3wJcaJ3k01uolk2an0mt8';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let allLeads = [];
+        let currentLead = null;
+
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             
-            // Demo credentials
             if (username === 'admin' && password === 'piyush@2024') {
                 document.getElementById('loginPage').style.display = 'none';
                 document.getElementById('dashboardPage').classList.add('active');
                 localStorage.setItem('isLoggedIn', 'true');
+                loadDashboard();
             } else {
                 const errorDiv = document.getElementById('loginError');
                 errorDiv.textContent = 'Invalid username or password';
@@ -950,19 +780,511 @@
             }
         });
 
-        // Check if already logged in
         if (localStorage.getItem('isLoggedIn') === 'true') {
             document.getElementById('loginPage').style.display = 'none';
             document.getElementById('dashboardPage').classList.add('active');
+            loadDashboard();
         }
 
-        // Logout
         function logout() {
             localStorage.removeItem('isLoggedIn');
             location.reload();
         }
 
-        // Navigation
+        async function loadDashboard() {
+            await Promise.all([
+                loadStats(),
+                loadRecentLeads(),
+                loadLeads(),
+                loadProperties(),
+                loadBlogs()
+            ]);
+        }
+
+        async function loadStats() {
+            try {
+                const [leadsResult, newLeadsResult, propertiesResult, blogsResult] = await Promise.all([
+                    supabase.from('leads').select('*', { count: 'exact', head: true }),
+                    supabase.from('leads').select('*', { count: 'exact', head: true }).eq('status', 'new'),
+                    supabase.from('properties').select('*', { count: 'exact', head: true }),
+                    supabase.from('blogs').select('*', { count: 'exact', head: true }).eq('status', 'published')
+                ]);
+
+                document.getElementById('totalLeads').textContent = leadsResult.count || 0;
+                document.getElementById('newLeads').textContent = newLeadsResult.count || 0;
+                document.getElementById('newLeadsCount').textContent = newLeadsResult.count || 0;
+                document.getElementById('totalProperties').textContent = propertiesResult.count || 0;
+                document.getElementById('totalBlogs').textContent = blogsResult.count || 0;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function loadRecentLeads() {
+            try {
+                const { data, error } = await supabase
+                    .from('leads')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(5);
+
+                if (error) throw error;
+
+                const tbody = document.getElementById('recentLeads');
+                tbody.innerHTML = '';
+
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No leads yet</td></tr>';
+                    return;
+                }
+
+                data.forEach(lead => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${lead.name}</td>
+                        <td>${lead.phone}</td>
+                        <td>${lead.interest}</td>
+                        <td>${lead.source || 'Direct'}</td>
+                        <td><span class="badge badge-${lead.status === 'new' ? 'new' : 'info'}">${lead.status}</span></td>
+                        <td><button class="btn btn-secondary btn-sm" onclick="viewLead(${lead.id})">View</button></td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error loading recent leads:', error);
+            }
+        }
+
+        async function loadLeads() {
+            try {
+                const { data, error } = await supabase
+                    .from('leads')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                allLeads = data;
+                displayLeads(data);
+            } catch (error) {
+                console.error('Error loading leads:', error);
+            }
+        }
+
+        function displayLeads(leads) {
+            const tbody = document.getElementById('leadsTable');
+            tbody.innerHTML = '';
+
+            if (leads.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="11" style="text-align: center;">No leads found</td></tr>';
+                return;
+            }
+
+            leads.forEach(lead => {
+                const date = new Date(lead.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>#${lead.id}</td>
+                    <td>${lead.name}</td>
+                    <td>${lead.phone}</td>
+                    <td>${lead.email || '-'}</td>
+                    <td>${lead.interest}</td>
+                    <td>${lead.preferred_location || '-'}</td>
+                    <td>${lead.budget || '-'}</td>
+                    <td>${lead.source || 'Direct'}</td>
+                    <td>${date}</td>
+                    <td><span class="badge badge-${lead.status === 'new' ? 'new' : 'info'}">${lead.status}</span></td>
+                    <td>
+                        <button class="btn btn-secondary btn-sm" onclick="viewLead(${lead.id})">View</button>
+                        <button class="btn btn-success btn-sm" onclick="contactLead('${lead.phone}', '${lead.name}')">Contact</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function filterLeads() {
+            const search = document.getElementById('leadSearch').value.toLowerCase();
+            const status = document.getElementById('statusFilter').value;
+            const interest = document.getElementById('interestFilter').value;
+
+            const filtered = allLeads.filter(lead => {
+                const matchSearch = !search || lead.name.toLowerCase().includes(search) || lead.phone.includes(search);
+                const matchStatus = !status || lead.status === status;
+                const matchInterest = !interest || lead.interest === interest;
+                return matchSearch && matchStatus && matchInterest;
+            });
+
+            displayLeads(filtered);
+        }
+
+        async function viewLead(id) {
+            try {
+                const { data, error } = await supabase
+                    .from('leads')
+                    .select('*')
+                    .eq('id', id)
+                    .single();
+
+                if (error) throw error;
+
+                currentLead = data;
+                const date = new Date(data.created_at).toLocaleString('en-US');
+                
+                document.getElementById('leadDetails').innerHTML = `
+                    <div class="detail-row"><strong>Name:</strong><span>${data.name}</span></div>
+                    <div class="detail-row"><strong>Phone:</strong><span>${data.phone}</span></div>
+                    <div class="detail-row"><strong>Email:</strong><span>${data.email || '-'}</span></div>
+                    <div class="detail-row"><strong>Interest:</strong><span>${data.interest}</span></div>
+                    <div class="detail-row"><strong>Location:</strong><span>${data.preferred_location || '-'}</span></div>
+                    <div class="detail-row"><strong>Budget:</strong><span>${data.budget || '-'}</span></div>
+                    <div class="detail-row"><strong>Contact Method:</strong><span>${data.contact_method}</span></div>
+                    <div class="detail-row"><strong>Preferred Time:</strong><span>${data.preferred_time || '-'}</span></div>
+                    <div class="detail-row"><strong>Message:</strong><span>${data.message || '-'}</span></div>
+                    <div class="detail-row"><strong>Source:</strong><span>${data.source || 'Direct'}</span></div>
+                    <div class="detail-row"><strong>Property:</strong><span>${data.property || '-'}</span></div>
+                    <div class="detail-row"><strong>Created:</strong><span>${date}</span></div>
+                    <div class="detail-row">
+                        <strong>Status:</strong>
+                        <select id="leadStatus">
+                            <option value="new" ${data.status === 'new' ? 'selected' : ''}>New</option>
+                            <option value="contacted" ${data.status === 'contacted' ? 'selected' : ''}>Contacted</option>
+                            <option value="qualified" ${data.status === 'qualified' ? 'selected' : ''}>Qualified</option>
+                            <option value="converted" ${data.status === 'converted' ? 'selected' : ''}>Converted</option>
+                            <option value="lost" ${data.status === 'lost' ? 'selected' : ''}>Lost</option>
+                        </select>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Notes:</strong>
+                        <textarea id="leadNotes" placeholder="Add notes about this lead...">${data.notes || ''}</textarea>
+                    </div>
+                `;
+                
+                document.getElementById('leadModal').classList.add('active');
+            } catch (error) {
+                console.error('Error loading lead:', error);
+                alert('Error loading lead details');
+            }
+        }
+
+        function closeLeadModal() {
+            document.getElementById('leadModal').classList.remove('active');
+        }
+
+        function contactLead(phone, name) {
+            const cleanPhone = phone.replace(/\D/g, '');
+            const message = `Hi ${name}, this is Piyush from Piyush Real Estate. I received your enquiry about properties. When would be a good time to discuss your requirements?`;
+            window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
+        }
+
+        function contactLeadFromModal() {
+            if (currentLead) {
+                contactLead(currentLead.phone, currentLead.name);
+            }
+        }
+
+        async function saveLeadChanges() {
+            if (!currentLead) return;
+
+            try {
+                const status = document.getElementById('leadStatus').value;
+                const notes = document.getElementById('leadNotes').value;
+
+                const { error } = await supabase
+                    .from('leads')
+                    .update({ status, notes })
+                    .eq('id', currentLead.id);
+
+                if (error) throw error;
+
+                alert('Lead updated successfully!');
+                closeLeadModal();
+                loadDashboard();
+            } catch (error) {
+                console.error('Error updating lead:', error);
+                alert('Error updating lead');
+            }
+        }
+
+        async function loadProperties() {
+            try {
+                const { data, error } = await supabase
+                    .from('properties')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                const tbody = document.getElementById('propertiesTable');
+                tbody.innerHTML = '';
+
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No properties yet</td></tr>';
+                    return;
+                }
+
+                data.forEach(property => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${property.title}</td>
+                        <td>${property.category}</td>
+                        <td>${property.location}</td>
+                        <td>${property.price}</td>
+                        <td><span class="badge badge-${property.status === 'available' ? 'success' : 'danger'}">${property.status}</span></td>
+                        <td>
+                            <button class="btn btn-secondary btn-sm" onclick="editProperty(${property.id})">Edit</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteProperty(${property.id})">Delete</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error loading properties:', error);
+            }
+        }
+
+        function openPropertyModal() {
+            document.getElementById('propertyModalTitle').textContent = 'Add New Property';
+            document.getElementById('propertyForm').reset();
+            document.getElementById('propertyId').value = '';
+            document.getElementById('propertyModal').classList.add('active');
+        }
+
+        function closePropertyModal() {
+            document.getElementById('propertyModal').classList.remove('active');
+        }
+
+        async function editProperty(id) {
+            try {
+                const { data, error } = await supabase
+                    .from('properties')
+                    .select('*')
+                    .eq('id', id)
+                    .single();
+
+                if (error) throw error;
+
+                document.getElementById('propertyModalTitle').textContent = 'Edit Property';
+                document.getElementById('propertyId').value = data.id;
+                document.getElementById('propertyTitle').value = data.title;
+                document.getElementById('propertyCategory').value = data.category;
+                document.getElementById('propertyLocation').value = data.location;
+                document.getElementById('propertyPrice').value = data.price;
+                document.getElementById('propertyPlotSize').value = data.plot_size;
+                document.getElementById('propertyStatus').value = data.status;
+                document.getElementById('propertyDescription').value = data.description;
+                document.getElementById('propertyModal').classList.add('active');
+            } catch (error) {
+                console.error('Error loading property:', error);
+                alert('Error loading property');
+            }
+        }
+
+        document.getElementById('propertyForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('propertyId').value;
+            const propertyData = {
+                title: document.getElementById('propertyTitle').value,
+                category: document.getElementById('propertyCategory').value,
+                location: document.getElementById('propertyLocation').value,
+                price: document.getElementById('propertyPrice').value,
+                plot_size: document.getElementById('propertyPlotSize').value,
+                status: document.getElementById('propertyStatus').value,
+                description: document.getElementById('propertyDescription').value
+            };
+
+            try {
+                if (id) {
+                    const { error } = await supabase
+                        .from('properties')
+                        .update(propertyData)
+                        .eq('id', id);
+                    if (error) throw error;
+                } else {
+                    const { error } = await supabase
+                        .from('properties')
+                        .insert([propertyData]);
+                    if (error) throw error;
+                }
+
+                alert('Property saved successfully!');
+                closePropertyModal();
+                loadProperties();
+            } catch (error) {
+                console.error('Error saving property:', error);
+                alert('Error saving property');
+            }
+        });
+
+        async function deleteProperty(id) {
+            if (!confirm('Are you sure you want to delete this property?')) return;
+
+            try {
+                const { error } = await supabase
+                    .from('properties')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) throw error;
+
+                alert('Property deleted successfully!');
+                loadProperties();
+            } catch (error) {
+                console.error('Error deleting property:', error);
+                alert('Error deleting property');
+            }
+        }
+
+        async function loadBlogs() {
+            try {
+                const { data, error } = await supabase
+                    .from('blogs')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                const tbody = document.getElementById('blogsTable');
+                tbody.innerHTML = '';
+
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No blogs yet</td></tr>';
+                    return;
+                }
+
+                data.forEach(blog => {
+                    const date = new Date(blog.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${blog.title}</td>
+                        <td>${blog.category || '-'}</td>
+                        <td>${date}</td>
+                        <td><span class="badge badge-${blog.status === 'published' ? 'success' : 'warning'}">${blog.status}</span></td>
+                        <td>
+                            <button class="btn btn-secondary btn-sm" onclick="editBlog(${blog.id})">Edit</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteBlog(${blog.id})">Delete</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error loading blogs:', error);
+            }
+        }
+
+        function openBlogModal() {
+            document.getElementById('blogModalTitle').textContent = 'Create New Blog Post';
+            document.getElementById('blogForm').reset();
+            document.getElementById('blogId').value = '';
+            document.getElementById('blogModal').classList.add('active');
+        }
+
+        function closeBlogModal() {
+            document.getElementById('blogModal').classList.remove('active');
+        }
+
+        async function editBlog(id) {
+            try {
+                const { data, error } = await supabase
+                    .from('blogs')
+                    .select('*')
+                    .eq('id', id)
+                    .single();
+
+                if (error) throw error;
+
+                document.getElementById('blogModalTitle').textContent = 'Edit Blog Post';
+                document.getElementById('blogId').value = data.id;
+                document.getElementById('blogTitle').value = data.title;
+                document.getElementById('blogCategory').value = data.category;
+                document.getElementById('blogContent').value = data.content;
+                document.getElementById('blogStatus').value = data.status;
+                document.getElementById('blogModal').classList.add('active');
+            } catch (error) {
+                console.error('Error loading blog:', error);
+                alert('Error loading blog');
+            }
+        }
+
+        document.getElementById('blogForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('blogId').value;
+            const blogData = {
+                title: document.getElementById('blogTitle').value,
+                category: document.getElementById('blogCategory').value,
+                content: document.getElementById('blogContent').value,
+                status: document.getElementById('blogStatus').value
+            };
+
+            try {
+                if (id) {
+                    const { error } = await supabase
+                        .from('blogs')
+                        .update(blogData)
+                        .eq('id', id);
+                    if (error) throw error;
+                } else {
+                    const { error } = await supabase
+                        .from('blogs')
+                        .insert([blogData]);
+                    if (error) throw error;
+                }
+
+                alert('Blog saved successfully!');
+                closeBlogModal();
+                loadBlogs();
+            } catch (error) {
+                console.error('Error saving blog:', error);
+                alert('Error saving blog');
+            }
+        });
+
+        async function deleteBlog(id) {
+            if (!confirm('Are you sure you want to delete this blog?')) return;
+
+            try {
+                const { error } = await supabase
+                    .from('blogs')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) throw error;
+
+                alert('Blog deleted successfully!');
+                loadBlogs();
+            } catch (error) {
+                console.error('Error deleting blog:', error);
+                alert('Error deleting blog');
+            }
+        }
+
+        function exportLeads() {
+            const csv = [
+                ['ID', 'Name', 'Phone', 'Email', 'Interest', 'Location', 'Budget', 'Source', 'Status', 'Date'],
+                ...allLeads.map(lead => [
+                    lead.id,
+                    lead.name,
+                    lead.phone,
+                    lead.email || '',
+                    lead.interest,
+                    lead.preferred_location || '',
+                    lead.budget || '',
+                    lead.source || '',
+                    lead.status,
+                    new Date(lead.created_at).toLocaleDateString()
+                ])
+            ].map(row => row.join(',')).join('\n');
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'leads.csv';
+            a.click();
+        }
+
         document.querySelectorAll('.menu-link').forEach(link => {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -978,55 +1300,11 @@
                     'overview': 'Dashboard Overview',
                     'leads': 'Lead Management',
                     'properties': 'Property Listings',
-                    'blogs': 'Blog Management',
-                    'consultations': 'Consultation Bookings',
-                    'payments': 'Payment Tracking',
-                    'settings': 'Settings'
+                    'blogs': 'Blog Management'
                 };
                 document.getElementById('pageTitle').textContent = titles[section];
             });
         });
-
-        // Lead functions
-        function viewLead(id) {
-            document.getElementById('leadModal').classList.add('active');
-        }
-
-        function closeLeadModal() {
-            document.getElementById('leadModal').classList.remove('active');
-        }
-
-        function contactLead(id) {
-            const phone = '917019901055';
-            const message = 'Hi, this is Piyush from Piyush Real Estate. I received your enquiry about properties. When would be a good time to discuss your requirements?';
-            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
-        }
-
-        function contactLeadFromModal() {
-            contactLead(1);
-        }
-
-        function saveLeadChanges() {
-            alert('Lead changes saved successfully!');
-            closeLeadModal();
-        }
-
-        function exportLeads() {
-            alert('Exporting leads to Excel...');
-        }
-
-        function exportConsultations() {
-            alert('Exporting consultations to Excel...');
-        }
-
-        // Simulate new lead notification
-        setInterval(() => {
-            const badge = document.getElementById('newLeadsCount');
-            const currentCount = parseInt(badge.textContent);
-            if (Math.random() > 0.7) {
-                badge.textContent = currentCount + 1;
-            }
-        }, 30000);
     </script>
 </body>
 </html>
